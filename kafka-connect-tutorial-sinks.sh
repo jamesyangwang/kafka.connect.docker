@@ -12,12 +12,15 @@ docker-compose up kafka-cluster elasticsearch postgres
 # A) ElasticSearch Sink
 # Info here: http://docs.confluent.io/3.2.0/connect/connect-elasticsearch/docs/elasticsearch_connector.html
 # We make sure elasticsearch is working. Replace 127.0.0.1 by 192.168.99.100 if needed
-http://127.0.0.1:9200/
+http://localhost.digicert.com:9200/
+
 # Go to the connect UI and apply the configuration at :
 sink/demo-elastic/sink-elastic-twitter-distributed.properties
+
 # Visualize the data at:
-http://127.0.0.1:9200/_plugin/dejavu
+http://localhost.digicert.com:9200/_plugin/dejavu
 # http://docs.confluent.io/3.1.1/connect/connect-elasticsearch/docs/configuration_options.html
+
 # Counting the number of tweets:
 http://127.0.0.1:9200/demo-3-twitter/_count
 # You can download the data from the UI to see what it looks like
