@@ -12,3 +12,7 @@
 12
 hello
 world
+new
+test
+100
+200

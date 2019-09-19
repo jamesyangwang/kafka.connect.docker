@@ -1,0 +1,102 @@
+
+docker-compose up -d kafka-cluster
+http://localhost:8083/
+http://localhost:3030/
+http://localhost:3030/logs/
+docker-compose logs -f
+
+winpty docker exec -it 36773766d567 bash
+
+kafka-topics --version		// 2.0.1-L0
+
+kafka-topics --zookeeper localhost:2181 --topic first_topic --create --partitions 3 --replication-factor 1
+kafka-topics --zookeeper localhost:2181 --list
+kafka-topics --zookeeper localhost:2181 --topic first_topic --describe
+
+kafka-topics --create --topic demo-1-standalone --partitions 3 --replication-factor 1 --zookeeper localhost.digicert.com:2181
+connect-standalone worker.properties file-stream-demo-standalone.properties
+
+docker run --rm -it landoop/fast-data-dev bash
+wget http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz
+tar -zxvf confluent-hub-client-latest.tar.gz
+https://www.confluent.io/hub/
+confluent-hub install debezium/debezium-connector-mysql:0.9.5
+confluent-hub install confluentinc/kafka-connect-jdbc:5.3.1
+
+https://www.confluent.io/blog/kafka-connect-deep-dive-jdbc-source-connector
+//=========================================================
+name=JdbcSourceConnector
+connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
+tasks.max=1
+connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
+topic.prefix=mariadb-
+connection.user=root
+connection.password=cfcNEBdUm6QerR6oo2UM
+mode=bulk
+catalog.pattern=digicert_com
+table.whitelist=users, products
+//=========================================================
+name=JdbcSourceConnector
+connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
+timestamp.column.name=modification_time
+connection.password=cfcNEBdUm6QerR6oo2UM
+validate.non.null=false
+tasks.max=1
+catalog.pattern=digicert_com
+table.whitelist=users, products
+mode=timestamp
+topic.prefix=mariadb-
+connection.user=root
+connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
+//=========================================================
+http://localhost:8083/connectors
+http://localhost:8083/connectors/JdbcSourceConnector/status
+
+kafka-topics --zookeeper localhost.digicert.com:2181 --topic mariadb-products --delete
+kafka-topics --zookeeper localhost.digicert.com:2181 --topic mariadb-users --delete
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
