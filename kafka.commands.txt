@@ -27,17 +27,6 @@ https://www.confluent.io/blog/kafka-connect-deep-dive-jdbc-source-connector
 //=========================================================
 name=JdbcSourceConnector
 connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
-tasks.max=1
-connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
-topic.prefix=mariadb-
-connection.user=root
-connection.password=cfcNEBdUm6QerR6oo2UM
-mode=bulk
-catalog.pattern=digicert_com
-table.whitelist=users, products
-//=========================================================
-name=JdbcSourceConnector
-connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
 timestamp.column.name=modification_time
 connection.password=cfcNEBdUm6QerR6oo2UM
 validate.non.null=false
@@ -55,10 +44,62 @@ http://localhost:8083/connectors/JdbcSourceConnector/status
 kafka-topics --zookeeper localhost.digicert.com:2181 --topic mariadb-products --delete
 kafka-topics --zookeeper localhost.digicert.com:2181 --topic mariadb-users --delete
 
+//=========================================================
+{
+   "name":"DSESinkConnector",
+   "config":{
+      "connector.class":"com.datastax.kafkaconnector.DseSinkConnector",
+      "tasks.max":"10",
+      "topics":"NOTIFICATION",
+      "contactPoints":"10.100.195.29",
+      "port":"9042",
+      "jmx":"true",
+      "maxConcurrentRequests":"10",
+      "maxNumberOfRecordsInBatch":"10",
+      "queryExecutionTimeout":"60",
+      "connectionPoolLocalSize":"4",
+      "compression":"None",
+      "loadBalancing.localDc":"SearchGraphAnalytics",
+      "topic.NOTIFICATION.hardenize.hardenize_ctdata.mapping":"account_id=value.X_Hardenize_Org, serial=value.message.data.serial, issuer=value.message.data.issuer, active=value.message.data.active, apiversion=value.message.apiVersion, capathlen=value.message.data.caPathLen, createdon=value.message.createdOn, ctcompliant=value.message.data.ctCompliant, ctlogs=value.message.data.ctLogs,ctrequired=value.message.data.ctRequired, duplicate=value.message.data.duplicate, effectivenotafter=value.message.data.effectiveNotAfter, eventhookid=value.X_Hardenize_EventHookId, firstseen=value.message.data.firstSeen, hook_type=value.message.type, hosts=value.message.data.hosts, id=value.message.id, keyalg=value.message.data.keyAlg, keylen=value.message.data.keyLen, keystrength=value.message.data.keyStrength, lastseen=value.message.data.lastSeen, managed=value.message.data.managed, matchesorghost=value.message.data.matchesOrgHost, notafter=value.message.data.notAfter, notbefore=value.message.data.notBefore, origin=value.message.data.origin, ownership=value.message.data.ownership, pem=value.message.data.pem, precert=value.message.data.precert, revokedon=value.message.data.revokedOn, seeninstalled=value.message.data.seenInstalled, selfsigned=value.message.data.selfSigned, sha256=value.message.data.sha256, sigalg=value.message.data.sigAlg, source=value.message.source, spkisha256=value.message.data.spkiSha256, subject=value.message.data.subject, symantecstatus=value.message.data.symantecStatus, tbssha256=value.message.data.tbsSha256, wildcard=value.message.data.wildcard",
+      "topic.NOTIFICATION.hardenize.hardenize_ctdata.consistencyLevel":"QUORUM",
+      "cassandra.write.mode":"Insert"
+   }
+}
+//=========================================================
 
+docker run -e DS_LICENSE=accept --name my-dse -d datastax/dse-server -s
+docker inspect my-dse | grep IPAddress
+winpty docker exec -it my-dse cqlsh
+winpty docker exec -it 4895f78475e7 cqlsh
 
+CREATE KEYSPACE mariadb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
+use mariadb;
+create table users (
+	id int,
+	acct_id int,
+	firstname varchar,
+	lastname varchar,
+	email varchar,
+	username varchar,
+	job_title varchar,
+	PRIMARY KEY (id));
+select * from users;
 
+//=========================================================
+name=CassandraSinkConnector
+connector.class=com.datamountaineer.streamreactor.connect.cassandra.sink.CassandraSinkConnector
+connect.cassandra.key.space=mariadb
+connect.cassandra.contact.points=localhost.digicert.com
+topics=mariadb-users
+tasks.max=1
+connect.cassandra.kcql=INSERT INTO users SELECT id, acct_id, firstname, lastname, email, username, job_title FROM mariadb-users
+connect.cassandra.port=9042
+//=========================================================
 
+docker inspect 06918e471a05 | grep IPAddress
+connect.cassandra.contact.points=172.17.0.4
+
+update digicert_com.users set telephone_extension = 1 where id > 0;
 
 
 
