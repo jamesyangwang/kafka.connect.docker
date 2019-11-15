@@ -38,6 +38,17 @@ topic.prefix=mariadb-
 connection.user=root
 connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
 //=========================================================
+connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
+mode=timestamp
+timestamp.column.name=modification_time
+topic.prefix=mariadb-view
+connection.password=cfcNEBdUm6QerR6oo2UM
+validate.non.null=false
+connection.user=root
+query=select * from users
+connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
+//=========================================================
+
 http://localhost:8083/connectors
 http://localhost:8083/connectors/JdbcSourceConnector/status
 
