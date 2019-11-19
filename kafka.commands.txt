@@ -38,6 +38,7 @@ topic.prefix=mariadb-
 connection.user=root
 connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
 //=========================================================
+name=JdbcSourceConnector
 connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
 mode=timestamp
 timestamp.column.name=modification_time

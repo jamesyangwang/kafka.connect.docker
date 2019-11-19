@@ -67,31 +67,6 @@ cat cassandra.yaml | grep initial_token
 
 #==============================================================================
 
-winpty docker exec -it 06918e471a05 cqlsh
-
-CREATE KEYSPACE mariadb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
-use mariadb;
-create table users (
-	id int,
-	acct_id int,
-	firstname varchar,
-	lastname varchar,
-	email varchar,
-	username varchar,
-	job_title varchar,
-	PRIMARY KEY (id));
-select * from users;
-
-CREATE SEARCH INDEX ON mariadb.users;
-desc active search index config on mariadb.users;
-desc pending search index config on mariadb.users;
-desc pending search index schema on mariadb.users;
-RELOAD SEARCH INDEX ON mariadb.users;
-
-SELECT count(*) FROM mariadb.users WHERE solr_query = '*:*';
-
-#==============================================================================
-
 winpty docker exec -it 4895f78475e7 bash
 
 dsetool get_core_config mariadb.users
@@ -183,45 +158,4 @@ ALTER SEARCH INDEX SCHEMA ON mariadb.users ADD types.fieldType [
 ALTER SEARCH INDEX SCHEMA ON mariadb.users SET fields.field[@name='text'] @type='SearchTextField';
 
 // cross fields, case insensitive, tokenized keyword match
-
-#==============================================================================
-
-docker-compose up -d
-docker-compose logs -f
-
-#MySQL Workbench: connect to local MariaDB
-
-Solr Web UI:
-http://localhost:8983/solr/#/
-
-Kafka Web UI:
-http://localhost:3030/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

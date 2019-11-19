@@ -1,0 +1,122 @@
+
+#==============================================================================
+
+docker-compose up -d
+docker-compose logs -f
+
+#==============================================================================
+
+#MySQL Workbench: connect to local MariaDB
+
+SELECT * FROM digicert_com.users;
+
+update digicert_com.users set telephone_extension = 2 where id > 0;
+
+update digicert_com.users set last_password_change = CURRENT_TIMESTAMP where id > 0;
+
+ALTER TABLE digicert_com.users ADD COLUMN modification_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+#==============================================================================
+
+winpty docker exec -it 024768495c4e cqlsh
+
+CREATE KEYSPACE mariadb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
+use mariadb;
+create table users (
+	id int,
+	acct_id int,
+	firstname varchar,
+	lastname varchar,
+	email varchar,
+	username varchar,
+	job_title varchar,
+	PRIMARY KEY (id));
+select * from users;
+
+CREATE SEARCH INDEX ON mariadb.users;
+desc active search index config on mariadb.users;
+desc pending search index config on mariadb.users;
+desc pending search index schema on mariadb.users;
+RELOAD SEARCH INDEX ON mariadb.users;
+
+SELECT count(*) FROM mariadb.users WHERE solr_query = '*:*';
+
+#==============================================================================
+
+Kafka Web UI:
+http://localhost:3030/
+
+#----------------------------------------------------------
+
+name=CassandraSinkConnector
+connector.class=com.datamountaineer.streamreactor.connect.cassandra.sink.CassandraSinkConnector
+connect.cassandra.key.space=mariadb
+connect.cassandra.contact.points=localhost.digicert.com
+topics=mariadb-users
+tasks.max=1
+connect.cassandra.kcql=INSERT INTO users SELECT id, acct_id, firstname, lastname, email, username, job_title FROM mariadb-users
+connect.cassandra.port=9042
+
+#----------------------------------------------------------
+
+name=JdbcSourceConnector
+connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
+mode=timestamp
+timestamp.column.name=modification_time
+topic.prefix=mariadb-users
+connection.password=cfcNEBdUm6QerR6oo2UM
+validate.non.null=false
+connection.user=root
+query=select * from users
+connection.url=jdbc:mariadb://localhost.digicert.com:3306/digicert_com
+
+#----------------------------------------------------------
+
+http://localhost:8083/connectors
+http://localhost:8083/connectors/JdbcSourceConnector/status
+http://localhost:3030/kafka-connect-ui/#/cluster/fast-data-dev
+
+#==============================================================================
+
+winpty docker exec -it 024768495c4e cqlsh
+
+SELECT count(*) FROM mariadb.users WHERE solr_query = '*:*';
+
+#==============================================================================
+
+Solr Web UI:
+http://localhost:8983/solr/#/
+
+Select source and query:
+http://localhost:8983/solr/#/mariadb.users/query
+http://localhost:8983/solr/mariadb.users/select?q=*%3A*&wt=json&indent=true
+
+#==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
